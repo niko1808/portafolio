@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lista de Compras</title>
+<style>
+  /* ===== RESET ===== */
+  * { margin:0; padding:0; box-sizing:border-box; font-family: 'Poppins', sans-serif; }
+  body { background: #0d1117; color: #e6edf3; display:flex; justify-content:center; align-items:center; height:100vh; }
+  
+  /* ===== CONTENEDOR ===== */
+  .container { background: #161b22; padding:2rem; border-radius:12px; width:350px; box-shadow:0 0 20px rgba(0,0,0,0.5);}
+  h1 { text-align:center; color:#58a6ff; margin-bottom:1rem;}
+  
+  /* ===== FORM ===== */
+  form { display:flex; gap:0.5rem; margin-bottom:1rem; }
+  input { flex:1; padding:0.5rem; border:none; border-radius:6px; background:#0d1117; color:#e6edf3; }
+  button { padding:0.5rem 1rem; border:none; border-radius:6px; background:#1f6feb; color:white; cursor:pointer; transition:0.3s;}
+  button:hover { background:#58a6ff; }
+
+  /* ===== LISTA ===== */
+  ul { list-style:none; max-height:300px; overflow-y:auto; }
+  li { background:#0d1117; padding:0.5rem; margin-bottom:0.5rem; border-radius:6px; display:flex; justify-content:space-between; align-items:center; }
+  li span { flex:1; }
+  li button { background:#ff5555; border:none; padding:0.3rem 0.6rem; border-radius:6px; cursor:pointer; transition:0.2s;}
+  li button:hover { background:#ff3333; }
+
+  /* ===== LIMPIAR ===== */
+  .clear-btn { margin-top:1rem; width:100%; background:#ffbb33; color:#000; }
+  .clear-btn:hover { background:#ffaa00; }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Lista de Compras</h1>
+    <form id="itemForm">
+      <input type="text" id="itemInput" placeholder="Agregar producto...">
+      <button type="submit">Añadir</button>
+    </form>
+    <ul id="itemsList"></ul>
+    <button class="clear-btn" id="clearBtn">Limpiar Lista</button>
+  </div>
+
+<script>
+  const form = document.getElementById('itemForm');
+  const input = document.getElementById('itemInput');
+  const list = document.getElementById('itemsList');
+  const clearBtn = document.getElementById('clearBtn');
+
+  // Cargar items de localStorage
+  let items = JSON.parse(localStorage.getItem('items')) || [];
+  function render() {
+    list.innerHTML = '';
+    items.forEach((item, index) => {
+      const li = document.createElement('li');
+      li.innerHTML = `<span>${item}</span><button onclick="deleteItem(${index})">X</button>`;
+      list.appendChild(li);
+    });
+    localStorage.setItem('items', JSON.stringify(items));
+  }
+
+  function deleteItem(index){
+    items.splice(index,1);
+    render();
+  }
+
+  form.addEventListener('submit', e=>{
+    e.preventDefault();
+    if(input.value.trim()!==''){
+      items.push(input.value.trim());
+      input.value='';
+      render();
+    }
+  });
+
+  clearBtn.addEventListener('click', ()=>{
+    items=[];
+    render();
+  });
+
+  render();
+</script>
+</body>
+</html>

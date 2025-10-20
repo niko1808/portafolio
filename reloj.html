@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>To-Do List Interactiva</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+  body{background:#0d1117;color:#e6edf3;display:flex;justify-content:center;align-items:center;height:100vh;overflow:hidden;position:relative;}
+  canvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;}
+
+  .container{position:relative;z-index:1;background:#161b22;padding:2rem;border-radius:12px;width:350px;box-shadow:0 0 20px rgba(0,0,0,0.5);}
+  h1{text-align:center;color:#58a6ff;margin-bottom:1rem;}
+
+  form{display:flex;gap:0.5rem;margin-bottom:1rem;}
+  input{flex:1;padding:0.5rem;border:none;border-radius:6px;background:#0d1117;color:#e6edf3;}
+  button{padding:0.5rem 1rem;border:none;border-radius:6px;background:#1f6feb;color:white;cursor:pointer;transition:0.3s;}
+  button:hover{background:#58a6ff;}
+
+  ul{list-style:none;max-height:300px;overflow-y:auto;}
+  li{background:#0d1117;padding:0.5rem;margin-bottom:0.5rem;border-radius:6px;display:flex;justify-content:space-between;align-items:center;}
+  li.completed span{text-decoration:line-through;color:#888;}
+  li span{flex:1;cursor:pointer;}
+  li button{background:#ff5555;border:none;padding:0.3rem 0.6rem;border-radius:6px;cursor:pointer;transition:0.2s;}
+  li button:hover{background:#ff3333;}
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<div class="container">
+  <h1>To-Do List</h1>
+  <form id="todoForm">
+    <input type="text" id="todoInput" placeholder="Agregar tarea...">
+    <button type="submit">Añadir</button>
+  </form>
+  <ul id="todoList"></ul>
+</div>
+
+<script>
+  // ==== TO-DO LIST ====
+  const form = document.getElementById('todoForm');
+  const input = document.getElementById('todoInput');
+  const list = document.getElementById('todoList');
+
+  let todos = JSON.parse(localStorage.getItem('todos')) || [];
+
+  function renderTodos(){
+    list.innerHTML='';
+    todos.forEach((todo,index)=>{
+      const li = document.createElement('li');
+      li.className = todo.completed ? 'completed' : '';
+      li.innerHTML = `<span onclick="toggleComplete(${index})">${todo.text}</span><button onclick="deleteTodo(${index})">X</button>`;
+      list.appendChild(li);
+    });
+    localStorage.setItem('todos',JSON.stringify(todos));
+  }
+
+  form.addEventListener('submit',e=>{
+    e.preventDefault();
+    if(input.value.trim()!==''){
+      todos.push({text:input.value.trim(),completed:false});
+      input.value='';
+      renderTodos();
+    }
+  });
+
+  window.toggleComplete = index=>{
+    todos[index].completed = !todos[index].completed;
+    renderTodos();
+  }
+
+  window.deleteTodo = index=>{
+    todos.splice(index,1);
+    renderTodos();
+  }
+
+  renderTodos();
+
+  // ==== PARTICULAS TELARAÑA ====
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  let width,height;
+  let mouse = {x:null,y:null};
+
+  function resize(){
+    width=canvas.width=window.innerWidth;
+    height=canvas.height=window.innerHeight;
+  }
+  window.addEventListener('resize',resize);
+  resize();
+
+  const particles=[];
+  const numParticles = 80;
+
+  for(let i=0;i<numParticles;i++){
+    particles.push({
+      x:Math.random()*width,
+      y:Math.random()*height,
+      vx:(Math.random()-0.5)*0.5,
+      vy:(Math.random()-0.5)*0.5,
+      radius:2
+    });
+  }
+
+  window.addEventListener('mousemove',e=>{
+    mouse.x=e.clientX;
+    mouse.y=e.clientY;
+  });
+
+  function animate(){
+    ctx.clearRect(0,0,width,height);
+    // Dibujar líneas
+    for(let i=0;i<numParticles;i++){
+      let p1 = particles[i];
+      for(let j=i+1;j<numParticles;j++){
+        let p2 = particles[j];
+        let dx = p1.x-p2.x;
+        let dy = p1.y-p2.y;
+        let dist = Math.sqrt(dx*dx+dy*dy);
+        if(dist<120){
+          ctx.strokeStyle='rgba(88,166,255,'+(1-dist/120)+')';
+          ctx.lineWidth=1;
+          ctx.beginPath();
+          ctx.moveTo(p1.x,p1.y);
+          ctx.lineTo(p2.x,p2.y);
+          ctx.stroke();
+        }
+      }
+      // Línea al mouse
+      if(mouse.x && mouse.y){
+        let dxm=p1.x-mouse.x;
+        let dym=p1.y-mouse.y;
+        let dMouse = Math.sqrt(dxm*dxm+dym*dym);
+        if(dMouse<150){
+          ctx.strokeStyle='rgba(255,255,255,'+(1-dMouse/150)+')';
+          ctx.lineWidth=1;
+          ctx.beginPath();
+          ctx.moveTo(p1.x,p1.y);
+          ctx.lineTo(mouse.x,mouse.y);
+          ctx.stroke();
+        }
+      }
+    }
+    // Dibujar partículas
+    particles.forEach(p=>{
+      p.x += p.vx;
+      p.y += p.vy;
+      if(p.x<0 || p.x>width) p.vx*=-1;
+      if(p.y<0 || p.y>height) p.vy*=-1;
+      ctx.fillStyle='#58a6ff';
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.radius,0,Math.PI*2);
+      ctx.fill();
+    });
+    requestAnimationFrame(animate);
+  }
+
+  animate();
+</script>
+
+</body>
+</html>
