@@ -14,15 +14,18 @@
 
   form{display:flex;gap:0.5rem;margin-bottom:1rem;}
   input{flex:1;padding:0.5rem;border:none;border-radius:6px;background:#0d1117;color:#e6edf3;}
-  button{padding:0.5rem 1rem;border:none;border-radius:6px;background:#1f6feb;color:white;cursor:pointer;transition:0.3s;}
+  button{padding:0.5rem 1rem;border:none;border-radius:6px;background:#1f6feb;color:white;cursor:pointer;transition:0.3s;font-size:16px;}
   button:hover{background:#58a6ff;}
 
   ul{list-style:none;max-height:300px;overflow-y:auto;}
-  li{background:#0d1117;padding:0.5rem;margin-bottom:0.5rem;border-radius:6px;display:flex;justify-content:space-between;align-items:center;}
+  li{background:#0d1117;padding:0.6rem;margin-bottom:0.6rem;border-radius:6px;display:flex;justify-content:space-between;align-items:center;gap:0.5rem;}
   li.completed span{text-decoration:line-through;color:#888;}
   li span{flex:1;cursor:pointer;}
-  li button{background:#ff5555;border:none;padding:0.3rem 0.6rem;border-radius:6px;cursor:pointer;transition:0.2s;}
-  li button:hover{background:#ff3333;}
+  .action-btn{border:none;padding:0.3rem 0.6rem;border-radius:6px;cursor:pointer;transition:0.2s;font-size:18px;}
+  .complete-btn{background:#2ea043;color:white;}
+  .complete-btn:hover{background:#3fb950;}
+  .delete-btn{background:#ff5555;color:white;}
+  .delete-btn:hover{background:#ff3333;}
 </style>
 </head>
 <body>
@@ -33,12 +36,11 @@
   <h1>To-Do List</h1>
   <form id="todoForm">
     <input type="text" id="todoInput" placeholder="Agregar tarea...">
-    <button type="submit">Añadir</button>
+    <button type="submit">➕</button>
   </form>
   <ul id="todoList"></ul>
 </div>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5945379257683075"
-     crossorigin="anonymous"></script>
+
 <script>
   // ==== TO-DO LIST ====
   const form = document.getElementById('todoForm');
@@ -52,7 +54,11 @@
     todos.forEach((todo,index)=>{
       const li = document.createElement('li');
       li.className = todo.completed ? 'completed' : '';
-      li.innerHTML = `<span onclick="toggleComplete(${index})">${todo.text}</span><button onclick="deleteTodo(${index})">X</button>`;
+      li.innerHTML = `
+        <span>${todo.text}</span>
+        <button class="action-btn complete-btn" onclick="toggleComplete(${index})">✔</button>
+        <button class="action-btn delete-btn" onclick="deleteTodo(${index})">🗑</button>
+      `;
       list.appendChild(li);
     });
     localStorage.setItem('todos',JSON.stringify(todos));
@@ -112,7 +118,6 @@
 
   function animate(){
     ctx.clearRect(0,0,width,height);
-    // Dibujar líneas
     for(let i=0;i<numParticles;i++){
       let p1 = particles[i];
       for(let j=i+1;j<numParticles;j++){
@@ -129,7 +134,6 @@
           ctx.stroke();
         }
       }
-      // Línea al mouse
       if(mouse.x && mouse.y){
         let dxm=p1.x-mouse.x;
         let dym=p1.y-mouse.y;
@@ -144,7 +148,6 @@
         }
       }
     }
-    // Dibujar partículas
     particles.forEach(p=>{
       p.x += p.vx;
       p.y += p.vy;
